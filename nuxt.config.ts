@@ -7,7 +7,7 @@ export default defineNuxtConfig({
       openAPI: true
     },
     externals: {
-      inline: ['@prisma/client']
+      inline: ['@prisma/client', '.prisma/client']
     }
   },
   runtimeConfig: {

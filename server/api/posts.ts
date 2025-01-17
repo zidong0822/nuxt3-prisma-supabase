@@ -3,16 +3,22 @@ import prisma from '../utils/prisma'
 export default defineEventHandler(async (event) => {
   try {
     const method = event.method
-    
+
+    // 添加数据库连接测试
+    await prisma.$connect()
+
     if (method === 'GET') {
-      const posts = await prisma.post.findMany()
-      return posts
+      const posts = await prisma.post.findMany({
+        orderBy: {
+          createdAt: 'desc'
+        }
+      })
+      return { success: true, data: posts }
     }
     
     if (method === 'POST') {
       const body = await readBody(event)
       
-      // 添加输入验证
       if (!body.title) {
         throw createError({
           statusCode: 400,
@@ -26,14 +32,23 @@ export default defineEventHandler(async (event) => {
           content: body.content || ''
         }
       })
-      return post
+      return { success: true, data: post }
     }
-  } catch (error) {
+
+  } catch (error: any) {
     console.error('API Error:', error)
+    
+    // 更详细的错误信息
+    const statusCode = error.statusCode || 500
+    const message = error.message || '服务器错误'
+    
     throw createError({
-      statusCode: 500,
-      message: '服务器错误',
+      statusCode,
+      message,
       cause: error
     })
+  } finally {
+    // 确保断开连接
+    await prisma.$disconnect()
   }
 }) 
