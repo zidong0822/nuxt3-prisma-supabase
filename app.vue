@@ -23,17 +23,27 @@ const newPost = ref({
 
 // 获取文章列表
 const fetchPosts = async () => {
-  posts.value = await $fetch('/api/posts')
+  try {
+    posts.value = await $fetch('/api/posts')
+  } catch (error) {
+    console.error('获取文章列表失败:', error)
+    posts.value = []
+  }
 }
 
 // 创建新文章
 const createPost = async () => {
-  await $fetch('/api/posts', {
-    method: 'POST',
-    body: newPost.value
-  })
-  await fetchPosts()
-  newPost.value = { title: '', content: '' }
+  try {
+    await $fetch('/api/posts', {
+      method: 'POST',
+      body: newPost.value
+    })
+    await fetchPosts()
+    newPost.value = { title: '', content: '' }
+  } catch (error) {
+    console.error('创建文章失败:', error)
+    alert('创建文章失败，请重试')
+  }
 }
 
 // 页面加载时获取文章列表
